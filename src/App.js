@@ -1,25 +1,56 @@
-import logo from './logo.svg';
 import './App.css';
+import { Routes, Route } from 'react-router-dom';
+import Navbar from './Components/Navbar';
+import ProblemSet from './Components/ProblemSet';
+import LeaderBoard from './Components/LeaderBoard';
+import SignUp from './Components/SignUp';
+import Login from './Components/Login';
+import ShowProblem from './Components/ShowProblem/ShowProblem';
+import AddProblem from './Components/AddProblem';
+import axios from 'axios';
+import { useEffect, useState, createContext } from "react";
+import Cookies from 'js-cookie';
+
+const UserContext = createContext();
 
 function App() {
+
+  const [token, setToken] = useState(Cookies.get('token'));
+  const [user, setUser] = useState({});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    (
+      async () => {
+        const USER_URL = "http://localhost:8000/api/user";
+        const res = await axios.get(USER_URL, { headers: { Authorization: token } });
+        if (res.status === 200) {
+          setUser(res.data);
+          setIsLoggedIn(true);
+        }
+        else {
+          setIsLoggedIn(false);
+        }
+      }
+    )();
+  }, [token]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <UserContext.Provider value={{ user, token, setToken, isLoggedIn, setIsLoggedIn }}>
+      <div className="App">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<ProblemSet />} />
+          <Route path="/leader-board" element={<LeaderBoard />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/problem/:problemSlug" element={<ShowProblem />} />
+          <Route path='/admin/add-problem' element={<AddProblem />} />
+        </Routes>
+      </div>
+    </UserContext.Provider>
   );
 }
 
 export default App;
+export { UserContext }
