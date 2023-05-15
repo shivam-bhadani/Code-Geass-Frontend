@@ -21,6 +21,7 @@ const Editor = ({lang, setCode}) => {
 				name="UNIQUE_ID_OF_DIV"
 				fontSize={14}
 				width="100%"
+				height="55vh"
 
 				setOptions={{
 					enableBasicAutocompletion: false,

@@ -1,8 +1,8 @@
 import "./ShowProblem.css";
 import { useContext, useEffect, useState } from "react"
 import Editor from "../Editor"
-import { Box, FormControl, InputLabel, NativeSelect } from '@mui/material'
-import { useParams } from "react-router-dom"
+import { Box, Button, FormControl, InputLabel, NativeSelect, Paper, TextField } from '@mui/material'
+import { useNavigate, useParams } from "react-router-dom"
 import { UserContext } from "../../App"
 import axios from "axios"
 import { ColorRing } from 'react-loader-spinner'
@@ -10,14 +10,22 @@ import { ColorRing } from 'react-loader-spinner'
 const ShowProblem = () => {
 
 	const [loader, setLoader] = useState(false);
-	const { token } = useContext(UserContext);
+	const { isLoggedIn, token } = useContext(UserContext);
 	const { problemSlug } = useParams();
 	const [problemDescriptionHTML, setProblemDescriptionHTML] = useState("");
 
 	const [code, setCode] = useState("");
 	const [lang, setLang] = useState("c_cpp");
+	const [input, setInput] = useState("");
+	const [output, setOutput] = useState("");
 
-	const handleChange = (event) => {
+	const navigate = useNavigate();
+
+	if(!isLoggedIn) {
+		navigate("/");
+	}
+
+	const handleLanguageChange = (event) => {
 		setLang(event.target.value);
 	};
 
@@ -26,7 +34,7 @@ const ShowProblem = () => {
 			async () => {
 				try {
 					setLoader(true);
-					const PROBLEM_URL = `http://localhost:8000/admin/problem/${problemSlug}`;
+					const PROBLEM_URL = `http://localhost:8000/api/problem/${problemSlug}`;
 					const res = await axios.get(PROBLEM_URL, { headers: { Authorization: token } });
 					if (res.status === 200) {
 						setProblemDescriptionHTML(res.data.description)
@@ -38,7 +46,51 @@ const ShowProblem = () => {
 				}
 			}
 		)();
-	}, [])
+	}, []);
+
+	const handleCodeRun = async () => {
+		try {
+			setLoader(true);
+			let language;
+			if(lang==="c_cpp") {
+				language = "cpp";
+			}
+			else if(lang==="python") {
+				language = "py";
+			}
+			const RUN_CODE_URL = `http://localhost:8000/api/run`;
+			const res = await axios.post(RUN_CODE_URL, {lang: language, code, input}, { headers: { Authorization: token } });
+			if(res.status===200) {
+				setOutput(res.data);
+			}
+			setLoader(false);
+		} catch(error) {
+			setOutput(error.response.data.stderr);
+			setLoader(false);
+		}
+	}
+
+	const handleSubmit = async() => {
+		try {
+			setLoader(true);
+			let language;
+			if(lang==="c_cpp") {
+				language = "cpp";
+			}
+			else if(lang==="python") {
+				language = "py";
+			}
+			const CHECK_CODE_URL = `http://localhost:8000/api/check/${problemSlug}`;
+			const res = await axios.post(CHECK_CODE_URL, {lang: language, code }, { headers: { Authorization: token } });
+			if(res.status===200) {
+				setOutput(res.data);
+			}
+			setLoader(false);
+		} catch(error) {
+			setOutput(error.response.data.stderr);
+			setLoader(false);
+		}
+	}
 
 	return (
 		<Box>
@@ -116,7 +168,7 @@ const ShowProblem = () => {
 									name: 'lang',
 									id: 'uncontrolled-native',
 								}}
-								onChange={handleChange}
+								onChange={handleLanguageChange}
 							>
 								<option value="c_cpp">C++</option>
 								<option value="java">Java</option>
@@ -126,6 +178,37 @@ const ShowProblem = () => {
 					</Box>
 				</Box>
 				<Editor lang={lang} setCode={setCode} />
+				<Box sx={{ display: "flex", gap: 3, mt: 2 }}>
+					<Box>
+						<Paper>
+							<TextField
+								id="outlined-multiline-static"
+								label="Input"
+								multiline
+								fullWidth
+								rows={4}
+								value={input}
+								onChange={(e) => {setInput(e.target.value)}}
+							/>
+						</Paper>
+						<Button variant="contained" color="error" sx={{ display: "block", mt: 1 }} onClick={handleCodeRun}>Run Code</Button>
+					</Box>
+					<Box>
+						<Paper>
+							<TextField
+								id="outlined-multiline-static"
+								label="Output"
+								multiline
+								fullWidth
+								rows={4}
+								value={output}
+							/>
+						</Paper>
+					</Box>
+					<Box sx={{ml: "auto", mr: 3}}>
+						<Button variant="contained" color="success" onClick={handleSubmit}>Submit</Button>
+					</Box>
+				</Box>
 			</Box>
 			{
 				loader &&

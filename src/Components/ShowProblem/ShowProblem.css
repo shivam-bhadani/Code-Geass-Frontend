@@ -1,3 +1,8 @@
+.outer-container {
+    font-family: 'Noto Sans', sans-serif;
+    font-family: 'Roboto', sans-serif;
+}
+
 .problem-heading {
     font-size: 20px;
     font-weight: 600;

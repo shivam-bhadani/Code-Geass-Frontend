@@ -8,25 +8,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TablePagination from "@mui/material/TablePagination";
 import Paper from '@mui/material/Paper';
-
-const tempRows = [
-	{
-		name: "Shivam Bhadani",
-		score: 1208
-	},
-	{
-		name: "Light Yagami",
-		score: 1100
-	},
-	{
-		name: "Monkey D. Luffy",
-		score: 1000
-	},
-	{
-		name: "Naruto",
-		score: 1150
-	},
-]
+import { UserContext } from '../App';
+import { useNavigate } from 'react-router-dom';
+import { ColorRing } from 'react-loader-spinner';
+import axios from 'axios';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -51,11 +36,33 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const LeaderBoard = () => {
 
-	tempRows.sort((a, b) => (b.score - a.score));
+	const [rows, setRows] = React.useState([]);
+	const [loader, setLoader] = React.useState(false);
+	const { token, isLoggedIn } = React.useContext(UserContext);
+	const navigate = useNavigate();
 
-	const rows = tempRows.map((row, id) => {
-		return { ...row, rank: id + 1 }
-	})
+	if(!isLoggedIn) {
+		navigate("/login");
+	}
+
+	React.useEffect(() => {
+		(
+			async () => {
+				try {
+					setLoader(true);
+					const GET_LEADER_BOARD = `http://localhost:8000/api/leader-board`;
+					const res = await axios.get(GET_LEADER_BOARD, { headers: { Authorization: token } });
+					if (res.status === 200) {
+						setRows(res.data);
+					}
+					setLoader(false);
+				} catch (error) {
+					console.log(error);
+					setLoader(false);
+				}
+			}
+		)();
+	}, []);
 
 	const [pg, setpg] = React.useState(0);
 	const [rpg, setrpg] = React.useState(10);

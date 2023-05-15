@@ -12,7 +12,7 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import Button from "@mui/material/Button";
 import axios from "axios";
 import { ColorRing } from 'react-loader-spinner'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from "../App";
 
 const AddProblem = () => {
@@ -22,10 +22,10 @@ const AddProblem = () => {
 	const { user, token } = useContext(UserContext);
 	const navigate = useNavigate();
 
-	if(!user) {
+	if (!user) {
 		navigate("/");
 	}
-	if(user.role!=="admin") {
+	if (user.role !== "admin") {
 		navigate("/");
 	}
 
@@ -41,10 +41,10 @@ const AddProblem = () => {
 
 
 	const handleChange = (event) => {
-    const { name, value } = event.target;
-    setData({ ...data, [name]: value });
-  };
-	
+		const { name, value } = event.target;
+		setData({ ...data, [name]: value });
+	};
+
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -70,37 +70,13 @@ const AddProblem = () => {
 
 	return (
 		<>
-			<Paper elevation={3} sx={{ mr: "15%", ml: "15%", mt: "50px" }}>
+			<Paper elevation={3} sx={{ mr: "15%", ml: "15%", mt: "50px", mb: "50px" }}>
 				<Box sx={{ padding: 5 }}>
 					<Typography variant="h6" gutterBottom sx={{ paddingBottom: 5, textAlign: "center" }}>
 						Add Problem
 					</Typography>
 					<form onSubmit={handleSubmit}>
 						<Grid container spacing={3}>
-							<Grid item xs={12} sm={2}>
-								<InputLabel
-									sx={{
-										display: "flex",
-										justifyContent: "center",
-										fontWeight: 700
-									}}
-								>
-									Slug
-								</InputLabel>
-							</Grid>
-							<Grid item xs={12} sm={10}>
-								<TextField
-									required
-									id="slug"
-									name="slug"
-									label="Slug"
-									fullWidth
-									size="small"
-									autoComplete="off"
-									variant="outlined"
-									onChange={handleChange}
-								/>
-							</Grid>
 							<Grid item xs={12} sm={2}>
 								<InputLabel
 									sx={{
@@ -177,8 +153,61 @@ const AddProblem = () => {
 									onChange={handleChange}
 								/>
 							</Grid>
+							<Grid item xs={12} sm={2}>
+								<InputLabel
+									sx={{
+										display: "flex",
+										justifyContent: "center",
+										fontWeight: 700
+									}}
+								>
+									Input
+								</InputLabel>
+							</Grid>
+							<Grid item xs={12} sm={10}>
+								<TextField
+									name='input'
+									required
+									id="outlined-multiline-static"
+									label="Input"
+									multiline
+									fullWidth
+									rows={4}
+									onChange={handleChange}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={2}>
+								<InputLabel
+									sx={{
+										display: "flex",
+										justifyContent: "center",
+										fontWeight: 700
+									}}
+								>
+									Output
+								</InputLabel>
+							</Grid>
+							<Grid item xs={12} sm={10}>
+								<TextField
+									name='output'
+									required
+									id="outlined-multiline-static"
+									label="Output"
+									multiline
+									fullWidth
+									rows={4}
+									onChange={handleChange}
+								/>
+							</Grid>
 						</Grid>
-						<Button type='submit' variant='contained' color='primary' sx={{ display: "block", m: "auto", mt: "10px" }}>Submit</Button>
+						<Box display="flex" alignItems="center" justifyContent="center" gap={3}>
+							<Box>
+								<Link to='/' style={{textDecoration: "none"}}><Button variant='contained' color='primary' sx={{ display: "block", m: "auto", mt: "10px" }}>Cancel</Button></Link>
+							</Box>
+							<Box>
+								<Button type='submit' variant='contained' color='primary' sx={{ display: "block", m: "auto", mt: "10px" }}>Submit</Button>
+							</Box>
+						</Box>
 					</form>
 				</Box>
 			</Paper>

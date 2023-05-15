@@ -10,48 +10,9 @@ import TablePagination from "@mui/material/TablePagination";
 import Paper from '@mui/material/Paper';
 import { UserContext } from '../App';
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ColorRing } from 'react-loader-spinner';
 import axios from 'axios';
-
-// const rows = [
-// 	{
-// 		slug: "two-sum",
-// 		title: "Two Sum",
-// 		difficulty: "Easy",
-// 		action: "Solved"
-// 	},
-// 	{
-// 		slug: "symmetric-tree",
-// 		title: "Symmetric Tree",
-// 		difficulty: "Easy",
-// 		action: "Unsolved"
-// 	},
-// 	{
-// 		slug: "binary-tree-level-order-traversal",
-// 		title: "Binary Tree Level Order Traversal",
-// 		difficulty: "Medium",
-// 		action: "Unsolved"
-// 	},
-// 	{
-// 		slug: "regular-expression-matching",
-// 		title: "Regular Expression Matching",
-// 		difficulty: "Hard",
-// 		action: "Unsolved"
-// 	},
-// 	{
-// 		slug: "integer-to-roman",
-// 		title: "Integer to Roman",
-// 		difficulty: "Medium",
-// 		action: "Unsolved"
-// 	},
-// 	{
-// 		slug: "wildCard-pattern-matching",
-// 		title: "WildCard Pattern Matching",
-// 		difficulty: "Hard",
-// 		action: "Solved"
-// 	},
-// ]
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
 	[`&.${tableCellClasses.head}`]: {
@@ -76,11 +37,17 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 const ProblemSet = () => {
 
+	const navigate = useNavigate();
+
 	const [rows, setRows] = useState([]);
 	const [loader, setLoader] = useState(false);
-	const { isLoggedIn } = useContext(UserContext);
+	const { token, isLoggedIn } = useContext(UserContext);
 	const [pg, setpg] = useState(0);
 	const [rpg, setrpg] = useState(10);
+
+	if(!isLoggedIn) {
+		navigate("/login");
+	}
 
 	useEffect(() => {
 		(
@@ -88,13 +55,9 @@ const ProblemSet = () => {
 				try {
 					setLoader(true);
 					const GET_ALL_PROBLEMS_URL = `http://localhost:8000/api/problem`;
-					const res = await axios.get(GET_ALL_PROBLEMS_URL);
+					const res = await axios.get(GET_ALL_PROBLEMS_URL, { headers: { Authorization: token } });
 					if (res.status === 200) {
-						const response = res.data;
-						const _rows = response.map((row) => {
-							return {...row, action: "Unsolved"};
-						})
-						setRows(_rows);
+						setRows(res.data);
 					}
 					setLoader(false);
 				} catch (error) {
