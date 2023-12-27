@@ -38,12 +38,14 @@ const Login = () => {
 				navigate('/');
 			}
 			else {
-				setLoginError(res.data);
+				console.log(res)
+				setLoginError(res.data?.message)
 				setIsLoggedIn(false);
 			}
 			setLoader(false);
 		} catch (error) {
 			setLoader(false);
+			setLoginError(error.response.data?.message)
 			console.log(error);
 		}
 	}
